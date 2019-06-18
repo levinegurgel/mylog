@@ -7,6 +7,45 @@ There is NO WARRANTY, to the extent permitted by law.
 
 Written by Levine <levinegurgelf@gmail.com>"
 
+#TODO logs recorrentes, modelo/template a partir de uma hashTag
+#TODO referenciar logs entre si
+#TODO sincronizar e fazer o merge do myLog de dispositivos diferentes(Android, etc)
+
+#TODO Receber parâmetro não obrigatório para inserir o myLog de um dia específico
+#TODO se o parâmetro for null, então inserir o log com a data atual
+#TODO Receber por parâmetro a hora (ex: #09:34:59 AM) permitindo inserir logs diferentes da hora atual
+#TODO receber id temporal por parâmetro ou a data/hora separada -y(year), -m(month), -d(day), -t(time format 000000)
+#TODO por ordem de prioridade, 1º idTemporal, 2º Data-Hora
+#TODO se nem o idTemporal, nem a data for informado, apenas a Hora, a data assumida será a data atual. Se a apenas o dia for informado, então o mês e ano assumidos serão os atuais, e assim por diante. 
+
+
+#TODO Ordenar e Inserir ordenado cronológicamente os registros do myLog
+#TODO permitir alterar o formato da hora dos registros por configuração (ex: formatTime = 1, 2, 3...)
+
+#TODO cabeçalho com mylog, diario de bordo, segunda dia 04 de Agosto de 2014
+
+#TODO inserir logs de 201508040000 201508040600 201508041200 201508041800
+
+#TODO implementar versões com dialog
+#TODO implementar a passagem de argumentos com texto longo --vesion, --help, --id, --tag
+#TODO -f find regular expression, or id, or tags from all mylogs registerd
+#TODO percorrer todas as tags, e adicionar a HashTag automaticamente
+#TODO atribuir tags ao log
+#TODO verificar se existe os ids Temporais das horas #Angelus
+
+#TODO verificar se já existe um idTemporal inserido no mylog
+#se não houver inserir o idTemporal no myLog
+
+#TODO Inserir a hora cronológicamente (antes de logs posteriores e depois de logs anteriores) quando a hora for passada por parâmetro
+#TODO Inserir a hora de cima para baixo
+#TODO cursor na linha do idTemporal
+
+#TODO parâmetro para visualizar apenas, não inserir idTemporal algum, apenas abrir o mylog na linha do id informado
+
+#TODO Estudar nomes DiarioDeBordo https://pt.wikipedia.org/wiki/Di%C3%A1rio_de_bordo, https://pt.wikipedia.org/wiki/Log_de_dados
+
+#TODO tratar idTemporal se o argumento é um dígito
+
 defaultEditor=vim.tiny
 
 #PrintUsage
@@ -91,6 +130,6 @@ fi
 echo $mylog >> $dir$fileName
 
 #If there is no log entry, open mylog with the default editor to edit directly in the file
-if [ ! $log ]; then
+if [ ! -n "$log" ]; then
   $defaultEditor "$dir$fileName"
 fi

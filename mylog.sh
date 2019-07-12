@@ -1,5 +1,5 @@
 #!/bin/bash
-version="18.06
+version="19.07
 Copyright (C) 2016 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
@@ -7,69 +7,37 @@ There is NO WARRANTY, to the extent permitted by law.
 
 Written by Levine <levinegurgelf@gmail.com>"
 
-#TODO logs recorrentes, modelo/template a partir de uma hashTag
-#TODO referenciar logs entre si
-#TODO sincronizar e fazer o merge do myLog de dispositivos diferentes(Android, etc)
-
-#TODO Receber parâmetro não obrigatório para inserir o myLog de um dia específico
-#TODO se o parâmetro for null, então inserir o log com a data atual
-#TODO Receber por parâmetro a hora (ex: #09:34:59 AM) permitindo inserir logs diferentes da hora atual
-#TODO receber id temporal por parâmetro ou a data/hora separada -y(year), -m(month), -d(day), -t(time format 000000)
-#TODO por ordem de prioridade, 1º idTemporal, 2º Data-Hora
-#TODO se nem o idTemporal, nem a data for informado, apenas a Hora, a data assumida será a data atual. Se a apenas o dia for informado, então o mês e ano assumidos serão os atuais, e assim por diante. 
-
-
-#TODO Ordenar e Inserir ordenado cronológicamente os registros do myLog
-#TODO permitir alterar o formato da hora dos registros por configuração (ex: formatTime = 1, 2, 3...)
-
-#TODO cabeçalho com mylog, diario de bordo, segunda dia 04 de Agosto de 2014
-
-#TODO inserir logs de 201508040000 201508040600 201508041200 201508041800
-
-#TODO implementar versões com dialog
-#TODO implementar a passagem de argumentos com texto longo --vesion, --help, --id, --tag
-#TODO -f find regular expression, or id, or tags from all mylogs registerd
-#TODO percorrer todas as tags, e adicionar a HashTag automaticamente
-#TODO atribuir tags ao log
-#TODO verificar se existe os ids Temporais das horas #Angelus
-
-#TODO verificar se já existe um idTemporal inserido no mylog
-#se não houver inserir o idTemporal no myLog
-
-#TODO Inserir a hora cronológicamente (antes de logs posteriores e depois de logs anteriores) quando a hora for passada por parâmetro
-#TODO Inserir a hora de cima para baixo
-#TODO cursor na linha do idTemporal
-
-#TODO parâmetro para visualizar apenas, não inserir idTemporal algum, apenas abrir o mylog na linha do id informado
-
-#TODO Estudar nomes DiarioDeBordo https://pt.wikipedia.org/wiki/Di%C3%A1rio_de_bordo, https://pt.wikipedia.org/wiki/Log_de_dados
-
-#TODO tratar idTemporal se o argumento é um dígito
-
 defaultEditor=vim.tiny
 
 #PrintUsage
 function PrintUsage() {
 
+hashTag="#Mylog #Example"
 log="Hello World"
-tags="#MylogTag #Example"
-mylog="#$timeStamp $tags $log"
 
 #recursively creates mylog directories if there is no
 if [ ! -d $dir ]; then
   mkdir -p $dir	
 fi
 
-echo $mylog >> $dir$fileName
+echo "" >> $dir$fileName
+echo "#$timeStamp $hashTag" >> $dir$fileName
+echo $log >> $dir$fileName
 
- echo "Mylog: Simple record of personal events in chronological order using timestamp as id and # for tags"
+ echo "Mylog: Simple record of personal events in chronological order using timestamp as id and # for hashTag"
  echo ""
- echo "Using: `basename $0` <-vh>[-ilt]"
+ echo "Using: `basename $0` <-vh>[-tl]"
+ echo "-t timestamp (optional, ex 20190712121500)"
+ echo "-l log"
  echo ""
  echo "Example:"
- echo "mylog -t \"$tags\" -l \"$log\"" 
+ echo "mylog -l \"$hashTag $log\"" 
+ echo ""
  echo "check this regsiter:"
- echo \""#$timeStamp $tags Hello World!\","
+ echo ""
+ echo "#$timeStamp $hashTag"
+ echo "$log"
+ echo ""
  echo "record on $dir$fileName"
  exit 1
 }
@@ -82,9 +50,9 @@ timeStamp=$(date +%Y%m%d%H%M%S)
 time=$(date +%H%M%S)
 
 dir=$HOME"/"Documents"/"$(date +%Y/%m/)
-fileName=".$(date +%Y%m%d)000000.mylog"
+fileName=.$(date +%Y%m%d)"000000.mylog"
 
- while getopts "i:l:t:hv" OPTION
+ while getopts "t:l:hv" OPTION
  do
    case $OPTION in
 
@@ -96,7 +64,7 @@ fileName=".$(date +%Y%m%d)000000.mylog"
 	   exit
 	   ;;
 
-	i) timeStamp=$OPTARG
+	t) timeStamp=$OPTARG
 
 	#Extract timeStamp date, year, month and day
 	date=`echo $timeStamp | cut -c1-8`
@@ -106,28 +74,42 @@ fileName=".$(date +%Y%m%d)000000.mylog"
 
 	#Assign directory with mylog date
 	dir=$HOME"/"Documents"/"$year"/"$month"/"
-	fileName=".$date000000.mylog"
+	fileName=.$date"000000.mylog"
+
 	;;
 
-	l) log=$OPTARG
+	l) logArray=($OPTARG) 
+
+	for i in "${logArray[@]}"
+	do
+	if [[ ${i:0:1} == '#' ]]
+	then
+	hashTag="$hashTag $i"
+	else
+	log="$log $i"
+	fi
+	done
 	;;
 
-	t) tags=$OPTARG
-	;;
-
+	# o)openLog=$OPTARG
    esac
  done
 shift $((OPTIND-1))
-
-mylog="#$timeStamp $tags $log"
 
 #recursively creates mylog directories
 if [ ! -d $dir ]; then
   mkdir -p $dir	
 fi
 
+
+if [ $timeStamp != $date"000000" ]; then
+
 #Adds mylog to the log file
-echo $mylog >> $dir$fileName
+echo "" >> $dir$fileName
+echo "#$timeStamp $hashTag" >> $dir$fileName
+echo $log >> $dir$fileName
+
+fi
 
 #If there is no log entry, open mylog with the default editor to edit directly in the file
 if [ ! -n "$log" ]; then

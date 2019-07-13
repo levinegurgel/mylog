@@ -12,13 +12,9 @@ defaultEditor=vim.tiny
 #PrintUsage
 function PrintUsage() {
 
-hashTag="#Mylog #Example"
-log="Hello World"
-
-#recursively creates mylog directories if there is no
-if [ ! -d $dir ]; then
-  mkdir -p $dir	
-fi
+setTimeStamp
+setLog "#Mylog #Example Hello World"
+setDir
 
 echo "" >> $dir$fileName
 echo "#$timeStamp $hashTag" >> $dir$fileName
@@ -27,8 +23,8 @@ echo $log >> $dir$fileName
  echo "Mylog: Simple record of personal events in chronological order using timestamp as id and # for hashTag"
  echo ""
  echo "Using: `basename $0` <-vh>[-tl]"
- echo "-t timestamp (optional, ex 20190712121500)"
- echo "-l log"
+ echo "-t timestamp (optional, ex: 20190712121500. The current timestamp is set when null)"
+ echo "-l log (optional, the default editor is opened when null)"
  echo ""
  echo "Example:"
  echo "mylog -l \"$hashTag $log\"" 
@@ -42,15 +38,79 @@ echo $log >> $dir$fileName
  exit 1
 }
 
-date=$(date +%Y/%m/%d)
-year=$(date +%Y)
-month=$(date +%m)
-day=$(date +%d)
-timeStamp=$(date +%Y%m%d%H%M%S)
-time=$(date +%H%M%S)
+function setTimeStamp() {
 
-dir=$HOME"/"Documents"/"$(date +%Y/%m/)
-fileName=.$(date +%Y%m%d)"000000.mylog"
+timeStamp=$1
+if [ -z "$timeStamp" ]; 
+then
+
+	timeStamp=$(date +%Y%m%d%H%M%S)
+	date=$(date +%Y%m%d)
+	year=$(date +%Y)
+	month=$(date +%m)
+	day=$(date +%d)
+	time=$(date +%H%M%S)
+else
+
+	#Extract timeStamp date, year, month and day
+	date=`echo $timeStamp | cut -c1-8`
+	year=`echo $timeStamp | cut -c1-4`
+	month=`echo $timeStamp | cut -c5-6`
+	day=`echo $timeStamp | cut -c7-8`
+fi
+
+}
+
+function setLog() {
+	
+logArray=($1)
+
+	for i in "${logArray[@]}"
+	do
+	if [[ ${i:0:1} == '#' ]]
+	then
+	hashTag="$hashTag $i"
+	else
+	log="$log $i"
+	fi
+	done
+
+}
+
+function setDir() {
+
+if [ -z $year ] || [ -z $month ]; then
+	setTimeStamp
+fi
+#Assign directory with mylog date
+dir=$HOME"/"Documents"/"$year"/"$month"/"
+fileName=.$date"000000.mylog"
+
+#recursively creates mylog directories if there is no
+if [ ! -d $dir ]; then
+  mkdir -p $dir	
+fi
+
+}
+
+function logRegister(){
+
+if [ $timeStamp != $date"000000" ]; then
+
+#Adds mylog to the log file
+echo "" >> $dir$fileName
+echo "#$timeStamp $hashTag" >> $dir$fileName
+echo $log >> $dir$fileName
+
+fi
+}
+
+function openEditor(){
+#If there is no log entry, open mylog with the default editor to edit directly in the file
+if [ ! -n "$log" ]; then
+  $defaultEditor "$dir$fileName"
+fi
+}
 
  while getopts "t:l:hv" OPTION
  do
@@ -64,31 +124,10 @@ fileName=.$(date +%Y%m%d)"000000.mylog"
 	   exit
 	   ;;
 
-	t) timeStamp=$OPTARG
-
-	#Extract timeStamp date, year, month and day
-	date=`echo $timeStamp | cut -c1-8`
-	year=`echo $timeStamp | cut -c1-4`
-	month=`echo $timeStamp | cut -c5-6`
-	day=`echo $timeStamp | cut -c7-8`
-
-	#Assign directory with mylog date
-	dir=$HOME"/"Documents"/"$year"/"$month"/"
-	fileName=.$date"000000.mylog"
-
+	t) timeStampArg=$OPTARG
 	;;
 
-	l) logArray=($OPTARG) 
-
-	for i in "${logArray[@]}"
-	do
-	if [[ ${i:0:1} == '#' ]]
-	then
-	hashTag="$hashTag $i"
-	else
-	log="$log $i"
-	fi
-	done
+	l) setLog "$OPTARG"
 	;;
 
 	# o)openLog=$OPTARG
@@ -96,22 +135,7 @@ fileName=.$(date +%Y%m%d)"000000.mylog"
  done
 shift $((OPTIND-1))
 
-#recursively creates mylog directories
-if [ ! -d $dir ]; then
-  mkdir -p $dir	
-fi
-
-
-if [ $timeStamp != $date"000000" ]; then
-
-#Adds mylog to the log file
-echo "" >> $dir$fileName
-echo "#$timeStamp $hashTag" >> $dir$fileName
-echo $log >> $dir$fileName
-
-fi
-
-#If there is no log entry, open mylog with the default editor to edit directly in the file
-if [ ! -n "$log" ]; then
-  $defaultEditor "$dir$fileName"
-fi
+setTimeStamp $timeStampArg
+setDir
+logRegister
+openEditor

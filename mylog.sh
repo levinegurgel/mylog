@@ -40,10 +40,11 @@ echo $log >> $dir$fileName
 
 function setTimeStamp() {
 
+#only number
+
 timeStamp=$1
 if [ -z "$timeStamp" ]; 
 then
-
 	timeStamp=$(date +%Y%m%d%H%M%S)
 	date=$(date +%Y%m%d)
 	year=$(date +%Y)
@@ -51,7 +52,6 @@ then
 	day=$(date +%d)
 	time=$(date +%H%M%S)
 else
-
 	#Extract timeStamp date, year, month and day
 	date=`echo $timeStamp | cut -c1-8`
 	year=`echo $timeStamp | cut -c1-4`
@@ -105,14 +105,14 @@ echo $log >> $dir$fileName
 fi
 }
 
-function openEditor(){
+function showLog(){
 #If there is no log entry, open mylog with the default editor to edit directly in the file
-if [ ! -n "$log" ]; then
+if [ ! -n "$log" ] && [ ! -n "$hashTag" ]; then
   $defaultEditor "$dir$fileName"
 fi
 }
 
- while getopts "t:l:hv" OPTION
+ while getopts "t:l:s:hv" OPTION
  do
    case $OPTION in
 
@@ -130,7 +130,10 @@ fi
 	l) setLog "$OPTARG"
 	;;
 
-	# o)openLog=$OPTARG
+	s) setTimeStamp $OPTARG
+	setDir
+	showLog
+	exit
    esac
  done
 shift $((OPTIND-1))
@@ -138,4 +141,4 @@ shift $((OPTIND-1))
 setTimeStamp $timeStampArg
 setDir
 logRegister
-openEditor
+showLog

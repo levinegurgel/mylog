@@ -108,6 +108,9 @@ echo "#$timeStamp $hashTag" >> $dir$fileName
 echo $log >> $dir$fileName
 
 fi
+
+# removendo todas as ocorrências do mylog no bash history, uma vez que o bash registra no histórico todos os comandos digitados no terminal
+sed -i '/mylog/d' "$HOME/.bash_history"
 }
 
 function showLog(){

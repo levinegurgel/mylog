@@ -22,7 +22,7 @@ echo $log >> $dir$fileName
 
  echo "Mylog: Simple record of personal events in chronological order using timestamp as id and # for hashTag"
  echo ""
- echo "Using: `basename $0` <-vh>[-tl]"
+ echo "Using: `basename $0` <-vh>[-tls]"
  echo "-t timestamp (optional, ex: 20190712121500. The current timestamp is set when null)"
  echo "-l log (optional, the default editor is opened when null)"
  echo ""
@@ -43,6 +43,7 @@ function setTimeStamp() {
 #only number
 
 timeStamp=$1
+
 if [ -z "$timeStamp" ]; 
 then
 	timeStamp=$(date +%Y%m%d%H%M%S)
@@ -52,6 +53,10 @@ then
 	day=$(date +%d)
 	time=$(date +%H%M%S)
 else
+	if [ ${#timeStamp} == 8 ]; then
+		timeStamp=$timeStamp"000000"
+	fi
+	
 	#Extract timeStamp date, year, month and day
 	date=`echo $timeStamp | cut -c1-8`
 	year=`echo $timeStamp | cut -c1-4`

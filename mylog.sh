@@ -15,10 +15,7 @@ function PrintUsage() {
 setTimeStamp
 setLog "#Mylog #Example Hello World"
 setDir
-
-echo "" >> $dir$fileName
-echo "#$timeStamp $hashTag" >> $dir$fileName
-echo $log >> $dir$fileName
+logRegister
 
  echo "Mylog: Simple record of personal events in chronological order using timestamp as id and # for hashTag"
  echo ""
@@ -53,6 +50,7 @@ then
 	day=$(date +%d)
 	time=$(date +%H%M%S)
 else
+	# TODO length - 14 = quantidade de zeros
 	if [ ${#timeStamp} == 8 ]; then
 		timeStamp=$timeStamp"000000"
 	fi
@@ -87,8 +85,9 @@ function setDir() {
 if [ -z $year ] || [ -z $month ]; then
 	setTimeStamp
 fi
+
 #Assign directory with mylog date
-dir=$HOME"/"Documents"/"$year"/"$month"/"
+dir="$HOME/Documents/$year/$month/"
 fileName=.$date"000000.mylog"
 
 #recursively creates mylog directories if there is no
@@ -106,6 +105,8 @@ if [ $timeStamp != $date"000000" ]; then
 echo "" >> $dir$fileName
 echo "#$timeStamp $hashTag" >> $dir$fileName
 echo $log >> $dir$fileName
+
+chmod 600 $dir$fileName
 
 fi
 
